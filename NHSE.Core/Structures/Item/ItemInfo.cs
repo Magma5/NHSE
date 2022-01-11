@@ -331,13 +331,13 @@ namespace NHSE.Core
             var kind = GetItemKind(item);
             return kind switch
             {
-                Kind_Insect => false,
+                Kind_Insect => true,
 
                 Kind_DummyPresentbox => false,
 
-                Kind_Fish => false,
-                Kind_DiveFish => false,
-                Kind_FlowerBud => false,
+                Kind_Fish => true,
+                Kind_DiveFish => true,
+                Kind_FlowerBud => true,
                 Kind_Bush => false,
                 Kind_Tree => false,
 

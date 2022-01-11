@@ -18,6 +18,8 @@ namespace NHSE.Core
         public readonly List<ComboItem> ItemDataSource;
         public readonly Dictionary<string, string> InternalNameTranslation = new();
 
+        public readonly HashSet<int> internalItemList;
+
         public IReadOnlyDictionary<string, string> BodyParts { get; }
         public IReadOnlyDictionary<string, string> BodyColor { get; }
         public IReadOnlyDictionary<string, string> FabricParts { get; }
@@ -33,7 +35,8 @@ namespace NHSE.Core
             villagerDefaultPhrases = Get("phrase");
             VillagerDefaultPhraseMap = GetMap(villagerDefaultPhrases);
             itemlist = Get("item");
-            itemlistdisplay = GetItemDisplayList(itemlist);
+            internalItemList = GetInternalItemList();
+            itemlistdisplay = GetItemDisplayList(itemlist, internalItemList);
             ItemDataSource = CreateItemDataSource(itemlistdisplay);
 
             BodyParts = GetDictionary(Get("body_parts"));
@@ -121,7 +124,7 @@ namespace NHSE.Core
             return VillagerDefaultPhraseMap.TryGetValue(name, out var result) ? result : name; // I know it shouldn't be name but I have to return something
         }
 
-        public static string[] GetItemDisplayList(string[] items)
+        public static string[] GetItemDisplayList(string[] items, HashSet<int> internalItems)
         {
             items = (string[])items.Clone();
             items[0] = string.Empty;
@@ -129,7 +132,7 @@ namespace NHSE.Core
             for (int i = 0; i < items.Length; i++)
             {
                 var item = items[i];
-                if (string.IsNullOrEmpty(item))
+                if (string.IsNullOrEmpty(item) || internalItems.Contains(i))
                     items[i] = $"(Item #{i:000})";
                 else if (set.Contains(item))
                     items[i] += $" (#{i:000})";
@@ -137,6 +140,17 @@ namespace NHSE.Core
                     set.Add(item);
             }
             return items;
+        }
+
+        public static HashSet<int> GetInternalItemList()
+        {
+            var items = ResourceUtil.GetStringList("InternalHexList");
+            var itemIDs = new HashSet<int>();
+            for (int i = 0; i < items.Length; i++)
+            {
+                itemIDs.Add(int.Parse(items[i], System.Globalization.NumberStyles.HexNumber));
+            }
+            return itemIDs;
         }
 
         public string GetItemName(Item item)
